@@ -1,6 +1,6 @@
 # ADR Generator
 
-A standalone Agent Skill for recording architectural and business decisions with their rationale, consequences, and verification evidence across technology stacks, monorepos, and business-only projects. Each project keeps its own decision history. This repository is the canonical source for the skill. It is not an OpenAI-endorsed or catalog-listed product.
+A standalone Agent Skill for recording architectural and business decisions with their rationale, consequences, and verification evidence across technology stacks, monorepos, and business-only projects. Each project keeps its own decision history.
 
 ## Quick install
 
