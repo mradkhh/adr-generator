@@ -4,6 +4,24 @@ A standalone Agent Skill for recording architectural and business decisions with
 
 ## Quick install
 
+### Gemini / Antigravity Agent
+
+For the current project, install the skill directly into the `.agents/` directory using the CLI:
+
+```bash
+npx skills add mradkhh/adr-generator --skill adr-generator --agent antigravity
+```
+
+*(Note: Antigravity automatically discovers skills in the `.agents/` folder. For global installation, if the CLI does not yet support Antigravity's global path `~/.gemini/config/skills`, you can clone and symlink it manually).*
+
+Once installed, Gemini will automatically discover it. You can invoke it by asking:
+
+```text
+Use the adr-generator skill to document the accepted architectural decision...
+```
+
+### Codex Agent
+
 Install for Codex across your projects:
 
 ```bash
@@ -37,6 +55,10 @@ Records go to the target project's ADR catalog, normally `docs/adr/`. Installati
 
 ## Update or remove
 
+**For Gemini:**
+To update, simply pull the latest changes via Git in the cloned repository. To remove, delete the symlink from `~/.gemini/config/skills/adr-generator` or `.agents/skills/adr-generator`.
+
+**For Codex:**
 Update only this globally installed skill:
 
 ```bash
@@ -66,7 +88,7 @@ ln -s /absolute/path/to/adr-generator "$HOME/.agents/skills/adr-generator"
 
 For a project-scoped development link, use `<project>/.agents/skills/adr-generator` instead. The destination must not exist; inspect it before replacing an old installation. Absolute symlinks are machine-specific. To share a checked-in copy, keep `SKILL.md`, `agents/`, and `assets/` together and record the source commit when updating it.
 
-The root `SKILL.md` is discoverable by the installer; no package manifest or custom install script is needed. Other [Agent Skills](https://agentskills.io/specification) clients can use the folder through their own installation mechanism. `agents/openai.yaml` is Codex-specific. Normal local ADR generation requires file access and, for Git-based requests, Git; it does not require Node.js, npm, an MCP server, or network access merely because the installer used them.
+The root `SKILL.md` is discoverable by the installer and natively understood by Gemini; no package manifest or custom install script is needed. Other [Agent Skills](https://agentskills.io/specification) clients can use the folder through their own installation mechanism. `agents/openai.yaml` is Codex-specific. Normal local ADR generation requires file access and, for Git-based requests, Git; it does not require Node.js, npm, an MCP server, or network access merely because the installer used them.
 
 ## Use
 
