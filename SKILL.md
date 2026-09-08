@@ -7,12 +7,38 @@ description: Create Architecture Decision Records (ADRs) for architectural choic
 
 Record why a consequential decision was made, what was chosen, and its tradeoffs. Produce concise Markdown records grounded in supplied decisions and repository evidence. Document the actual design even when it differs from a preferred architecture; do not invent a simpler design and describe it as implemented.
 
+Apply this workflow to any technology stack, monorepo, or business-only project. Git is needed only for Git-based requests. The skill's installation directory does not determine where records are collected.
+
 ## Establish the scope
 
-- Identify the target project from the request and working directory. Write into that project, not into this installed skill. Ask only if materially different targets remain plausible.
-- Read applicable project instructions and relevant existing ADRs. Follow the project's ADR location, naming, language, and template; default to `docs/adr/`, numbered Markdown files, and the user's language when no convention exists.
+- Resolve the project root and output catalog using the rules below. Read applicable project instructions and relevant existing ADRs. Follow the project's naming, language, and template; default to numbered Markdown files and the user's language when no convention exists.
 - Use the requested plan, files, commit range, or business decision as the boundary. Do not expand an ADR request into implementation, deployment, migration, commit, or publication work.
 - Prefer one record per independently understandable decision. Keep tightly coupled details together. Routine refactoring, formatting, or a commit list alone does not justify a new ADR. If no lasting decision is supported, explain that without creating a filler record.
+
+## Resolve the project and output catalog
+
+Determine the project root in this order:
+
+1. Use the project explicitly identified by the user. Resolve a relative project path from the working directory. Preserve an explicitly selected subproject boundary.
+2. Otherwise use the Git repository root containing the working directory (`git rev-parse --show-toplevel` when available). An internal `src/` or `apps/server/` directory is not automatically the project root.
+3. Without Git, use the working directory as the project root unless the request identifies a different project folder.
+
+If the working directory is a container for multiple projects and the request does not identify one, ask which project to document. Do not guess a sibling repository or derive the target from the installed skill path. Write into the skill repository only when that repository itself is the requested subject.
+
+Select the ADR output directory using the first applicable source:
+
+| Priority | Directory source |
+| --- | --- |
+| 1 | The user's explicit output directory for this task. |
+| 2 | Applicable project documentation rules, such as AGENTS.md. |
+| 3 | An existing ADR catalog appropriate to this project and decision scope. |
+| 4 | `<project-root>/docs/adr/`. |
+
+Resolve a user-supplied relative output path from the selected project root, not the shell's current subdirectory or the skill folder. Honor absolute output paths as supplied. Follow an explicitly stated path base in project instructions; otherwise resolve their relative output paths from the project root. Inspect project documentation and relevant ADR files to identify an existing catalog; ignore dependency, build, and installed-skill example directories. If several catalogs are plausible and neither scope nor instructions selects one, clarify rather than creating another catalog. A user-directed new catalog is allowed, but does not imply moving existing records.
+
+For a monorepo, default to a single root catalog. Select a service-specific catalog only when existing project conventions or the user's request establish that scope. Do not create one catalog per package automatically. Independent projects keep independent catalogs; a shared skill installation does not create a shared document archive.
+
+Before writing, briefly state the resolved project root, absolute output directory, and the reason it was selected. This is an informational update, not a confirmation gate. Create a missing directory only when a record is ready to be written. If the destination cannot be written, report that destination and the failure instead of silently falling back elsewhere.
 
 ## Gather evidence
 
@@ -61,7 +87,7 @@ Accepted does not imply deployed. Keep acceptance, implementation verification, 
 
 ## Check history integrity before writing
 
-Check numeric IDs across the catalog and inspect replacement relationships for the relevant topic, following links as needed. Treat existing explicit replacement wording as evidence too; legacy ADRs do not need to be rewritten to add a field.
+Check numeric IDs within the selected catalog and inspect replacement relationships for the relevant topic, following links as needed. Independent catalogs may each contain ADR 001. Identify cross-catalog records by their resolved file paths, not bare numbers, and write full relative links from the new record. Treat existing explicit replacement wording as evidence too; legacy ADRs do not need to be rewritten to add a field.
 
 - Report duplicate numeric IDs. Numbering gaps are valid.
 - Every `Supersedes` target must resolve to an existing ADR. Reject self-references and circular replacement chains, including those introduced by the proposed output. Ordinary reference links are not replacement relationships.
@@ -81,7 +107,7 @@ Use [the ADR template](assets/adr-template.md) when the project has no template.
 - Include code, plan, commit, and prior ADR references as applicable. Prefer repository-relative links from the output file. Keep verification brief: command or method, result, evidence source/revision when known, and relevant unchecked work. For a non-code decision, explain why code checks do not apply.
 - Replace every template placeholder. Remove optional empty sections rather than inventing their content.
 
-For a new catalog use `001-short-decision-name.md` and a matching title. Otherwise follow the existing numeric prefix width and separator. Allocate `max(existing numeric ADR prefixes) + 1`, not file count; preserve gaps and expand beyond three digits when necessary. An existing duplicate ID must be reported, not silently repaired.
+For a new catalog use `001-short-decision-name.md` and a matching title. Otherwise follow the existing numeric prefix width and separator. Within the selected catalog, allocate `max(existing numeric ADR prefixes) + 1`, not file count; preserve gaps and expand beyond three digits when necessary. Do not include other projects' or independent service catalogs' IDs. An existing duplicate ID within the selected catalog must be reported, not silently repaired.
 
 Recheck the directory immediately before writing. Create new records without overwriting an existing path (use exclusive creation when supported); if another writer takes the number, reread and choose the next unused number. Do not renumber historical files.
 

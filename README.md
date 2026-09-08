@@ -1,17 +1,24 @@
 # ADR Generator
 
-A standalone Agent Skill for recording architectural and business decisions with their rationale, consequences, and verification evidence. This repository is the canonical source for the skill. It is not an OpenAI-endorsed or catalog-listed product.
+A standalone Agent Skill for recording architectural and business decisions with their rationale, consequences, and verification evidence across technology stacks, monorepos, and business-only projects. Each project keeps its own decision history. This repository is the canonical source for the skill. It is not an OpenAI-endorsed or catalog-listed product.
 
 ## Install for Codex
 
-Clone this repository as `adr-generator`, then link that folder into the target project's skill directory. Substitute absolute paths for your checkout and project:
+Clone this repository as `adr-generator`. For access across your projects, link the checkout into your user skill directory:
+
+```bash
+mkdir -p "$HOME/.agents/skills"
+ln -s /absolute/path/to/adr-generator "$HOME/.agents/skills/adr-generator"
+```
+
+For a project-scoped installation instead, link it into that project's skill directory. Substitute absolute paths for your checkout and project:
 
 ```bash
 mkdir -p /absolute/path/to/project/.agents/skills
 ln -s /absolute/path/to/adr-generator /absolute/path/to/project/.agents/skills/adr-generator
 ```
 
-The destination must not already exist. Inspect an existing installation before replacing it. A symlink uses your local checkout directly; its absolute target is machine-specific. For a portable checked-in installation, copy `SKILL.md`, `agents/`, and `assets/` together into `.agents/skills/adr-generator/` and record the source commit when updating the copy.
+Use the installation scope you need; avoid installing the same skill in both locations for the same project. The destination must not already exist. Inspect an existing installation before replacing it. A symlink uses your local checkout directly; its absolute target is machine-specific. For a portable checked-in installation, copy `SKILL.md`, `agents/`, and `assets/` together into `.agents/skills/adr-generator/` and record the source commit when updating the copy.
 
 The folder name must remain `adr-generator`. The skill at this repository's root is its distributable source; cloning it alone does not install it into another project's discovery path. If discovery does not refresh, restart Codex. See [Codex skill discovery](https://learn.chatgpt.com/docs/build-skills).
 
@@ -40,9 +47,47 @@ decision and verification evidence in this conversation. Preserve ADR 003.
 
 Relevant natural-language ADR requests can also activate the skill. Ordinary implementation and changelog requests alone should not.
 
+You can name the project and destination explicitly in natural language:
+
+```text
+$adr-generator Document the accepted offline-storage decision for
+/projects/mobile. Write the ADR into documentation/decisions.
+Use the implementation and verification evidence in this conversation.
+```
+
+This selects `/projects/mobile/documentation/decisions/`, even when invoked from another directory. These are prompt instructions, not CLI flags.
+
+## Where documents are collected
+
+Installing the skill globally makes the workflow available across projects; it does not collect their documents in a global folder. The project root comes from an explicit user-selected project, otherwise the Git root containing the working directory, otherwise the working directory for a project without Git. An ambiguous parent folder containing several projects requires selecting the target project first.
+
+The output directory follows this precedence:
+
+1. The user's explicit destination for the task.
+2. Applicable project documentation rules, such as `AGENTS.md`.
+3. An existing ADR catalog appropriate to the decision scope.
+4. `<project-root>/docs/adr/`.
+
+Relative output paths are based on the selected project root; absolute paths are honored as supplied. An explicitly documented alternative path base in project instructions is respected. Multiple plausible catalogs are clarified before writing. Existing records are not moved when a different destination is selected. A missing catalog is created when an ADR is ready; write failures are reported rather than redirected to another folder.
+
+```text
+~/.agents/skills/adr-generator/       Shared skill installation
+
+/projects/backend/docs/adr/          Backend decision history
+    001-authentication.md
+    002-order-pricing.md
+
+/projects/mobile/docs/adr/           Mobile decision history
+    001-offline-storage.md
+```
+
+A monorepo defaults to one root catalog. A service-specific catalog is used only when project conventions or the request establish it. Numbering and duplicate-ID checks are local to the selected catalog; separate projects can both start at `001`. Cross-catalog references identify the actual file through a relative path, not just its number.
+
+Before writing, the agent reports the selected project, absolute ADR directory, and selection basis. This does not require routine confirmation. The final response links to the actual output file. Documents go into the skill repository only when the skill repository itself is the project being documented.
+
 ## Output and history
 
-The output belongs in the target project's existing ADR catalog, defaulting to `docs/adr/`. Records capture context, decision, consequences, verification, and references. A new catalog starts at `001`; later records use the largest existing numeric prefix plus one.
+Records in the selected catalog capture context, decision, consequences, verification, and references. A new catalog starts at `001`; later records use the largest existing numeric prefix in that catalog plus one.
 
 Drafts can be refined. Finalized decisions retain their historical content; a later record links back when a decision is replaced or retired. Under the default append-only convention the earlier status remains historical, so read related later records to determine the current decision. Existing explicit project lifecycle conventions take precedence.
 
@@ -102,6 +147,15 @@ Format validation does not establish correct decisions. Exercise these requests 
 | Accepted business-only decision | Acceptance basis stated; no invented code or test results |
 | Same decision already recorded | Existing record returned without a duplicate |
 | Non-CRM project or no Git history | Project-local output; no CRM assumptions or invented Git range |
+| Invocation from a repository's src/ subdirectory | Repository-root catalog is selected unless explicitly overridden |
+| Monorepo with no service-specific convention | One root catalog; no automatic package catalogs |
+| Explicit subproject or service-specific convention | Selected scope is respected |
+| Relative custom output with an explicit project | Destination is resolved from that project root |
+| Existing nonstandard ADR directory | Existing catalog is reused without a parallel docs/adr/ |
+| Ambiguous parent folder or multiple plausible catalogs | Target is clarified before writing |
+| Two projects both containing ADR 001 | Numbering is independent; no false duplicate finding |
+| Global skill installation used from another project | Output belongs to the target project, not the skill checkout |
+| Unwritable selected directory | Destination and failure reported; no silent fallback |
 
 Check description matching with both ADR requests and unrelated editing/changelog requests. Check local links, unresolved placeholders, number collisions, and the final file changes. A clean validator result is only a format result.
 
