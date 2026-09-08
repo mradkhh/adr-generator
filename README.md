@@ -2,27 +2,71 @@
 
 A standalone Agent Skill for recording architectural and business decisions with their rationale, consequences, and verification evidence across technology stacks, monorepos, and business-only projects. Each project keeps its own decision history. This repository is the canonical source for the skill. It is not an OpenAI-endorsed or catalog-listed product.
 
-## Install for Codex
+## Quick install
 
-Clone this repository as `adr-generator`. For access across your projects, link the checkout into your user skill directory:
+Install for Codex across your projects:
+
+```bash
+npx skills add mradkhh/adr-generator --skill adr-generator --agent codex --global
+```
+
+You need Node.js and npm (`npx`), Git, and network access to npm and this GitHub repository. The tested `skills` CLI version is **1.5.23**, which requires **Node.js 22.20.0 or newer**. If the repository is private, your GitHub account needs access and working Git/GitHub authentication. See the [installer's private-repository guidance](https://github.com/vercel-labs/skills#private-repositories).
+
+For only the current project, run the same command from its root without `--global`:
+
+```bash
+npx skills add mradkhh/adr-generator --skill adr-generator --agent codex
+```
+
+The installer manages the destination and any links. Choose one scope to avoid overlapping installations. Replace `codex` with your agent's identifier when using another supported client; see the [skills CLI documentation](https://github.com/vercel-labs/skills#readme). Client support for optional metadata may differ.
+
+Verify a global installation:
+
+```bash
+npx skills list --global --agent codex
+```
+
+For a project installation, omit `--global` and run from that project's root. Then invoke the skill in Codex:
+
+```text
+$adr-generator Document the accepted architectural decision in this project
+using the rationale and verification evidence in this conversation.
+```
+
+Records go to the target project's ADR catalog, normally `docs/adr/`. Installation does not create an ADR or collect documents in the skill folder. If Codex discovery does not refresh, restart it; see [Codex skill discovery](https://learn.chatgpt.com/docs/build-skills).
+
+## Update or remove
+
+Update only this globally installed skill:
+
+```bash
+npx skills update adr-generator --global
+```
+
+For a project installation, run `npx skills update adr-generator --project` from the project root. Updates use the recorded installation source; review changes to installed files before updating.
+
+Remove this skill from global Codex installation:
+
+```bash
+npx skills remove adr-generator --agent codex --global
+```
+
+For a project installation, omit `--global` and run from its root. Removing the installed skill should leave the project's `docs/adr/` records intact; those documents are separate from the skill package. Avoid broad commands that update or remove every installed skill.
+
+If migrating from a manual copy or symlink, inspect both user and project installations first. Preserve any local edits outside the installation directory, remove only the old installation or symlink, then use Quick install. Do not delete the original source checkout or ADR catalog. A manually linked checkout is updated with Git, not assumed to be tracked by the installer.
+
+## Local development installation
+
+For editing the skill itself, clone this repository as `adr-generator` and link the checkout into your user skill directory:
 
 ```bash
 mkdir -p "$HOME/.agents/skills"
 ln -s /absolute/path/to/adr-generator "$HOME/.agents/skills/adr-generator"
 ```
 
-For a project-scoped installation instead, link it into that project's skill directory. Substitute absolute paths for your checkout and project:
+For a project-scoped development link, use `<project>/.agents/skills/adr-generator` instead. The destination must not exist; inspect it before replacing an old installation. Absolute symlinks are machine-specific. To share a checked-in copy, keep `SKILL.md`, `agents/`, and `assets/` together and record the source commit when updating it.
 
-```bash
-mkdir -p /absolute/path/to/project/.agents/skills
-ln -s /absolute/path/to/adr-generator /absolute/path/to/project/.agents/skills/adr-generator
-```
-
-Use the installation scope you need; avoid installing the same skill in both locations for the same project. The destination must not already exist. Inspect an existing installation before replacing it. A symlink uses your local checkout directly; its absolute target is machine-specific. For a portable checked-in installation, copy `SKILL.md`, `agents/`, and `assets/` together into `.agents/skills/adr-generator/` and record the source commit when updating the copy.
-
-The folder name must remain `adr-generator`. The skill at this repository's root is its distributable source; cloning it alone does not install it into another project's discovery path. If discovery does not refresh, restart Codex. See [Codex skill discovery](https://learn.chatgpt.com/docs/build-skills).
-
-Other clients that support the [Agent Skills format](https://agentskills.io/specification) can use the same folder through their own installation mechanism. `agents/openai.yaml` is Codex-specific metadata; compatibility with every client is not claimed. The skill needs file access and uses Git for Git-based requests. It requires no custom runtime, MCP server, or network access for ordinary local documentation.
+The root `SKILL.md` is discoverable by the installer; no package manifest or custom install script is needed. Other [Agent Skills](https://agentskills.io/specification) clients can use the folder through their own installation mechanism. `agents/openai.yaml` is Codex-specific. Normal local ADR generation requires file access and, for Git-based requests, Git; it does not require Node.js, npm, an MCP server, or network access merely because the installer used them.
 
 ## Use
 
@@ -71,7 +115,7 @@ The output directory follows this precedence:
 Relative output paths are based on the selected project root; absolute paths are honored as supplied. An explicitly documented alternative path base in project instructions is respected. Multiple plausible catalogs are clarified before writing. Existing records are not moved when a different destination is selected. A missing catalog is created when an ADR is ready; write failures are reported rather than redirected to another folder.
 
 ```text
-~/.agents/skills/adr-generator/       Shared skill installation
+(installer-managed skill directory) Shared skill installation
 
 /projects/backend/docs/adr/          Backend decision history
     001-authentication.md
