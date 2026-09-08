@@ -4,7 +4,7 @@ A standalone Agent Skill for recording architectural and business decisions with
 
 ## Quick install
 
-### Gemini / Antigravity Agent
+### Antigravity Agent
 
 For the current project, install the skill directly into the `.agents/` directory using the CLI:
 
@@ -12,9 +12,7 @@ For the current project, install the skill directly into the `.agents/` director
 npx skills add mradkhh/adr-generator --skill adr-generator --agent antigravity
 ```
 
-*(Note: Antigravity automatically discovers skills in the `.agents/` folder. For global installation, if the CLI does not yet support Antigravity's global path `~/.gemini/config/skills`, you can clone and symlink it manually).*
-
-Once installed, Gemini will automatically discover it. You can invoke it by asking:
+Once installed, Antigravity will automatically discover it. You can invoke it by asking:
 
 ```text
 Use the adr-generator skill to document the accepted architectural decision...
