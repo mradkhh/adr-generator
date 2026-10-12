@@ -1,5 +1,12 @@
 # ADR Generator
 
+> **Moved.** This skill now lives in [mradkhh/skills](https://github.com/mradkhh/skills) as **`mradkhh-adr-generator`**, under the MIT License. This repository is archived.
+>
+> ```bash
+> npx skills remove adr-generator
+> npx skills add mradkhh/skills --skill mradkhh-adr-generator
+> ```
+
 A standalone Agent Skill for recording architectural and business decisions with their rationale, consequences, and verification evidence across technology stacks, monorepos, and business-only projects. Each project keeps its own decision history.
 
 ## Quick install
